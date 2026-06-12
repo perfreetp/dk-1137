@@ -8,51 +8,66 @@ import styles from './index.module.scss';
 
 type MessageType = 'all' | 'comment' | 'hug' | 'private';
 
+interface ConversationItem {
+  userId: string;
+  userName: string;
+  lastMessage: string;
+  lastTime: string;
+  unreadCount: number;
+  messages: any[];
+}
+
 const MessagesPage: React.FC = () => {
   const { privateMessages } = useApp();
   const [activeTab, setActiveTab] = useState<MessageType>('all');
-  const [messages, setMessages] = useState<any[]>([]);
+  const [conversations, setConversations] = useState<ConversationItem[]>([]);
+  const [otherMessages, setOtherMessages] = useState<any[]>([]);
 
   useEffect(() => {
-    const allMessages = [
-      ...privateMessages.map(pm => ({
-        id: pm.id,
-        type: 'private' as const,
-        fromUserId: pm.fromUserId,
-        fromAnonymousName: pm.fromAnonymousName,
-        content: pm.content,
-        isRead: pm.isRead,
-        createdAt: pm.createdAt
-      })),
-      ...mockMessages
-    ];
-    allMessages.sort((a, b) => {
-      const dateA = new Date(a.createdAt.replace(/\//g, '-')).getTime();
-      const dateB = new Date(b.createdAt.replace(/\//g, '-')).getTime();
+    const convMap = new Map<string, ConversationItem>();
+    
+    privateMessages.forEach(pm => {
+      const key = pm.fromUserId;
+      const existing = convMap.get(key);
+      if (!existing || new Date(pm.createdAt.replace(/\//g, '-')).getTime() > new Date(existing.lastTime.replace(/\//g, '-')).getTime()) {
+        convMap.set(key, {
+          userId: pm.fromUserId,
+          userName: pm.fromAnonymousName || '匿名用户',
+          lastMessage: pm.content,
+          lastTime: pm.createdAt,
+          unreadCount: pm.isRead ? 0 : 1,
+          messages: [pm]
+        });
+      } else if (!pm.isRead) {
+        existing.unreadCount++;
+        existing.messages.push(pm);
+      }
+    });
+
+    const sortedConvs = Array.from(convMap.values()).sort((a, b) => {
+      const dateA = new Date(a.lastTime.replace(/\//g, '-')).getTime();
+      const dateB = new Date(b.lastTime.replace(/\//g, '-')).getTime();
       return dateB - dateA;
     });
-    setMessages(allMessages);
+    
+    setConversations(sortedConvs);
   }, [privateMessages]);
 
-  const unreadCount = messages.filter(m => !m.isRead).length;
+  useEffect(() => {
+    const filtered = mockMessages.filter(m => m.type !== 'private');
+    setOtherMessages(filtered);
+  }, []);
 
-  const getFilteredMessages = () => {
-    if (activeTab === 'all') return messages;
-    return messages.filter(m => m.type === activeTab);
+  const unreadCount = conversations.reduce((sum, c) => sum + c.unreadCount, 0) + otherMessages.filter(m => !m.isRead).length;
+
+  const handleConversationClick = (conv: ConversationItem) => {
+    Taro.navigateTo({ 
+      url: `/pages/chat/index?fromId=${conv.userId}&fromName=${encodeURIComponent(conv.userName)}` 
+    });
   };
 
-  const handleMessageClick = (message: any) => {
-    if (!message.isRead) {
-      setMessages(prev => prev.map(m => 
-        m.id === message.id ? { ...m, isRead: true } : m
-      ));
-    }
-    
-    if (message.type === 'private' && message.fromUserId) {
-      Taro.navigateTo({ 
-        url: `/pages/chat/index?fromId=${message.fromUserId}&fromName=${encodeURIComponent(message.fromAnonymousName || '')}` 
-      });
-    } else if (message.postId) {
+  const handleOtherMessageClick = (message: any) => {
+    if (message.postId) {
       Taro.navigateTo({ url: `/pages/post-detail/index?id=${message.postId}` });
     }
   };
@@ -78,13 +93,11 @@ const MessagesPage: React.FC = () => {
   };
 
   const tabs = [
-    { key: 'all', label: '全部', count: messages.length },
-    { key: 'comment', label: '评论', count: messages.filter(m => m.type === 'comment').length },
-    { key: 'hug', label: '拥抱', count: messages.filter(m => m.type === 'hug').length },
-    { key: 'private', label: '私信', count: messages.filter(m => m.type === 'private').length }
+    { key: 'all', label: '全部' },
+    { key: 'private', label: '私信' },
+    { key: 'comment', label: '评论' },
+    { key: 'hug', label: '拥抱' }
   ];
-
-  const filteredMessages = getFilteredMessages();
 
   return (
     <View className={styles.container}>
@@ -103,55 +116,169 @@ const MessagesPage: React.FC = () => {
             onClick={() => setActiveTab(tab.key as MessageType)}
           >
             {tab.label}
-            {tab.count > 0 && activeTab !== tab.key && (
-              <View className={styles.tabBadge}>{tab.count}</View>
-            )}
           </View>
         ))}
       </View>
 
       <ScrollView className={styles.content} scrollY>
-        {filteredMessages.length > 0 ? (
-          <View className={styles.messageList}>
-            {filteredMessages.map(message => (
-              <View
-                key={message.id}
-                className={classnames(
-                  styles.messageItem,
-                  !message.isRead && styles.messageUnread
-                )}
-                onClick={() => handleMessageClick(message)}
-              >
-                <View 
-                  className={classnames(
-                    styles.avatar,
-                    message.type === 'system' && styles.systemAvatar
-                  )}
-                >
-                  {message.fromAnonymousName?.charAt(0) || '📢'}
-                </View>
-                <View className={styles.messageInfo}>
-                  <View className={styles.messageHeader}>
-                    <Text className={styles.senderName}>
-                      {message.type === 'system' ? '系统通知' : message.fromAnonymousName}
-                    </Text>
-                    <Text className={styles.messageTime}>{message.createdAt}</Text>
-                  </View>
-                  <Text className={styles.messageContent}>
-                    <Text className={classnames(styles.messageType, getTypeClass(message.type))}>
-                      {getTypeLabel(message.type)}
-                    </Text>
-                    {message.content}
-                  </Text>
+        {activeTab === 'all' && (
+          <>
+            {conversations.length > 0 && (
+              <View className={styles.section}>
+                <Text className={styles.sectionTitle}>私信会话</Text>
+                <View className={styles.conversationList}>
+                  {conversations.map(conv => (
+                    <View
+                      key={conv.userId}
+                      className={classnames(
+                        styles.conversationItem,
+                        conv.unreadCount > 0 && styles.unread
+                      )}
+                      onClick={() => handleConversationClick(conv)}
+                    >
+                      <View className={styles.convAvatar}>
+                        <Text className={styles.convAvatarText}>{conv.userName.charAt(0)}</Text>
+                      </View>
+                      <View className={styles.convInfo}>
+                        <View className={styles.convHeader}>
+                          <Text className={styles.convName}>{conv.userName}</Text>
+                          <Text className={styles.convTime}>{conv.lastTime}</Text>
+                        </View>
+                        <View className={styles.convLastMsg}>
+                          <Text className={styles.convMessage} numberOfLines={1}>{conv.lastMessage}</Text>
+                          {conv.unreadCount > 0 && (
+                            <View className={styles.unreadBadge}>
+                              <Text className={styles.unreadCount}>{conv.unreadCount}</Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    </View>
+                  ))}
                 </View>
               </View>
-            ))}
-          </View>
-        ) : (
-          <View className={styles.emptyState}>
-            <Text className={styles.emptyIcon}>📭</Text>
-            <Text className={styles.emptyText}>暂无消息</Text>
-          </View>
+            )}
+
+            {otherMessages.length > 0 && (
+              <View className={styles.section}>
+                <Text className={styles.sectionTitle}>互动通知</Text>
+                <View className={styles.messageList}>
+                  {otherMessages.map(message => (
+                    <View
+                      key={message.id}
+                      className={classnames(
+                        styles.messageItem,
+                        !message.isRead && styles.messageUnread
+                      )}
+                      onClick={() => handleOtherMessageClick(message)}
+                    >
+                      <View className={styles.avatar}>
+                        {message.fromAnonymousName?.charAt(0) || '📢'}
+                      </View>
+                      <View className={styles.messageInfo}>
+                        <View className={styles.messageHeader}>
+                          <Text className={styles.senderName}>
+                            {message.fromAnonymousName || '系统通知'}
+                          </Text>
+                          <Text className={styles.messageTime}>{message.createdAt}</Text>
+                        </View>
+                        <Text className={styles.messageContent}>
+                          <Text className={classnames(styles.messageType, getTypeClass(message.type))}>
+                            {getTypeLabel(message.type)}
+                          </Text>
+                          {message.content}
+                        </Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+          </>
+        )}
+
+        {activeTab === 'private' && (
+          <>
+            {conversations.length > 0 ? (
+              <View className={styles.conversationList}>
+                {conversations.map(conv => (
+                  <View
+                    key={conv.userId}
+                    className={classnames(
+                      styles.conversationItem,
+                      conv.unreadCount > 0 && styles.unread
+                    )}
+                    onClick={() => handleConversationClick(conv)}
+                  >
+                    <View className={styles.convAvatar}>
+                      <Text className={styles.convAvatarText}>{conv.userName.charAt(0)}</Text>
+                    </View>
+                    <View className={styles.convInfo}>
+                      <View className={styles.convHeader}>
+                        <Text className={styles.convName}>{conv.userName}</Text>
+                        <Text className={styles.convTime}>{conv.lastTime}</Text>
+                      </View>
+                      <View className={styles.convLastMsg}>
+                        <Text className={styles.convMessage} numberOfLines={1}>{conv.lastMessage}</Text>
+                        {conv.unreadCount > 0 && (
+                          <View className={styles.unreadBadge}>
+                            <Text className={styles.unreadCount}>{conv.unreadCount}</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View className={styles.emptyState}>
+                <Text className={styles.emptyIcon}>💬</Text>
+                <Text className={styles.emptyText}>暂无私信</Text>
+              </View>
+            )}
+          </>
+        )}
+
+        {(activeTab === 'comment' || activeTab === 'hug') && (
+          <>
+            {otherMessages.filter(m => m.type === activeTab).length > 0 ? (
+              <View className={styles.messageList}>
+                {otherMessages.filter(m => m.type === activeTab).map(message => (
+                  <View
+                    key={message.id}
+                    className={classnames(
+                      styles.messageItem,
+                      !message.isRead && styles.messageUnread
+                    )}
+                    onClick={() => handleOtherMessageClick(message)}
+                  >
+                    <View className={styles.avatar}>
+                      {message.fromAnonymousName?.charAt(0) || '📢'}
+                    </View>
+                    <View className={styles.messageInfo}>
+                      <View className={styles.messageHeader}>
+                        <Text className={styles.senderName}>
+                          {message.fromAnonymousName || '系统通知'}
+                        </Text>
+                        <Text className={styles.messageTime}>{message.createdAt}</Text>
+                      </View>
+                      <Text className={styles.messageContent}>
+                        <Text className={classnames(styles.messageType, getTypeClass(message.type))}>
+                          {getTypeLabel(message.type)}
+                        </Text>
+                        {message.content}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View className={styles.emptyState}>
+                <Text className={styles.emptyIcon}>📭</Text>
+                <Text className={styles.emptyText}>暂无{activeTab === 'comment' ? '评论' : '拥抱'}通知</Text>
+              </View>
+            )}
+          </>
         )}
       </ScrollView>
     </View>

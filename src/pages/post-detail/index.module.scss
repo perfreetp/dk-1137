@@ -46,16 +46,23 @@
   flex: 1;
 }
 
+.userNameRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+  flex-wrap: wrap;
+}
+
 .privateHint {
   font-size: $font-size-xs;
   color: $color-primary;
+  margin-left: 12rpx;
 }
 
 .userName {
   font-size: $font-size-md;
   font-weight: $font-weight-semibold;
   color: $color-text-primary;
-  margin-bottom: 8rpx;
 }
 
 .meta {

@@ -13,7 +13,9 @@ export default defineAppConfig({
     'pages/my-posts/index',
     'pages/my-replies/index',
     'pages/my-collections/index',
-    'pages/chat/index'
+    'pages/chat/index',
+    'pages/anonymous-profile/index',
+    'pages/activity/index'
   ],
   window: {
     backgroundTextStyle: 'light',

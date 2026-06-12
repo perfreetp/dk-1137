@@ -39,6 +39,11 @@
   flex: 1;
 }
 
+.viewProfile {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.8);
+}
+
 .nickname {
   font-size: $font-size-xl;
   font-weight: $font-weight-bold;

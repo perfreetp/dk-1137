@@ -31,13 +31,32 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const handleMyProfile = () => {
+    Taro.navigateTo({ 
+      url: `/pages/anonymous-profile/index?userId=${user.id}&name=${encodeURIComponent(user.anonymousName)}` 
+    });
+  };
+
   const handleCheckIn = () => {
     Taro.navigateTo({ url: '/pages/mood/index' });
   };
 
   const menuItems = [
     {
-      icon: '📝',
+      icon: '�',
+      title: '我的主页',
+      desc: '查看我的匿名主页',
+      path: '',
+      action: handleMyProfile
+    },
+    {
+      icon: '👣',
+      title: '互动足迹',
+      desc: '评论、收藏、私信记录',
+      path: '/pages/activity/index'
+    },
+    {
+      icon: '�📝',
       title: '我的发布',
       desc: `${myPosts.length}篇帖子`,
       path: '/pages/my-posts/index'
@@ -77,7 +96,7 @@ const ProfilePage: React.FC = () => {
   return (
     <View className={styles.container}>
       <View className={styles.header}>
-        <View className={styles.profileCard}>
+        <View className={styles.profileCard} onClick={handleMyProfile}>
           <View className={styles.avatar}>
             <Text className={styles.avatarText}>
               {user.anonymousName.charAt(0)}
@@ -87,6 +106,7 @@ const ProfilePage: React.FC = () => {
             <Text className={styles.nickname}>{user.anonymousName}</Text>
             <Text className={styles.department}>{user.department}</Text>
           </View>
+          <Text className={styles.viewProfile}>查看主页 ›</Text>
         </View>
 
         <View className={styles.statsRow}>
@@ -115,9 +135,9 @@ const ProfilePage: React.FC = () => {
             <Text className={styles.actionIcon}>⭐</Text>
             <Text className={styles.actionLabel}>我的收藏</Text>
           </View>
-          <View className={styles.actionItem} onClick={() => handleMenuClick('/pages/topics/index')}>
-            <Text className={styles.actionIcon}>🏷️</Text>
-            <Text className={styles.actionLabel}>我的话题</Text>
+          <View className={styles.actionItem} onClick={() => handleMenuClick('/pages/activity/index')}>
+            <Text className={styles.actionIcon}>👣</Text>
+            <Text className={styles.actionLabel}>互动足迹</Text>
           </View>
           <View className={styles.actionItem} onClick={() => handleMenuClick('/pages/settings/index')}>
             <Text className={styles.actionIcon}>⚙️</Text>
@@ -157,7 +177,7 @@ const ProfilePage: React.FC = () => {
             <View
               key={index}
               className={styles.menuItem}
-              onClick={() => handleMenuClick(item.path)}
+              onClick={() => item.action ? item.action() : handleMenuClick(item.path)}
             >
               <Text className={styles.menuIcon}>{item.icon}</Text>
               <View className={styles.menuInfo}>

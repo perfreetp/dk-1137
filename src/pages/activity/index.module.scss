@@ -1,0 +1,116 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  min-height: 100vh;
+  background: $color-bg-gradient;
+  padding: $page-padding;
+}
+
+.tabs {
+  display: flex;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: 8rpx;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.tab {
+  flex: 1;
+  padding: 16rpx 0;
+  text-align: center;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  border-radius: $radius-md;
+  transition: all $transition-base;
+}
+
+.tabActive {
+  background: $color-primary;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+}
+
+.list {
+  min-height: 60vh;
+}
+
+.activityCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.activityHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.activityType {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+  font-size: 20rpx;
+  margin-right: 12rpx;
+}
+
+.typeComment {
+  background: rgba($color-message, 0.2);
+  color: #4169E1;
+}
+
+.typeHug {
+  background: rgba($color-hug, 0.2);
+  color: #FF69B4;
+}
+
+.typePrivate {
+  background: rgba($color-primary, 0.2);
+  color: $color-primary;
+}
+
+.typeCollect {
+  background: rgba(#FFD700, 0.2);
+  color: #DAA520;
+}
+
+.activityTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.activityContent {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  margin-bottom: 12rpx;
+}
+
+.postPreview {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  padding: 12rpx;
+  background: $color-bg-page;
+  border-radius: $radius-sm;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+}
+
+.emptyIcon {
+  font-size: 120rpx;
+  margin-bottom: $spacing-lg;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}

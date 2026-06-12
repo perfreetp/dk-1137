@@ -48,6 +48,14 @@ const PostDetailPage: React.FC = () => {
   }, [allComments]);
 
   const handleAuthorClick = () => {
+    if (post) {
+      Taro.navigateTo({ 
+        url: `/pages/anonymous-profile/index?userId=${post.userId}&name=${encodeURIComponent(post.anonymousName)}` 
+      });
+    }
+  };
+
+  const handlePrivateClick = () => {
     if (post && post.userId !== user.id) {
       Taro.navigateTo({ 
         url: `/pages/chat/index?fromId=${post.userId}&fromName=${encodeURIComponent(post.anonymousName)}` 
@@ -145,13 +153,20 @@ const PostDetailPage: React.FC = () => {
                 </Text>
               </View>
               <View className={styles.userInfo}>
-                <Text 
-                  className={styles.userName}
-                  onClick={handleAuthorClick}
-                >
-                  {post.anonymousName}
-                  {post.userId !== user.id && <Text className={styles.privateHint}> 💬</Text>}
-                </Text>
+                <View className={styles.userNameRow}>
+                  <Text 
+                    className={styles.userName}
+                    onClick={handleAuthorClick}
+                  >
+                    {post.anonymousName}
+                  </Text>
+                  {post.userId !== user.id && (
+                    <Text 
+                      className={styles.privateHint}
+                      onClick={handlePrivateClick}
+                    > 💬 发私信</Text>
+                  )}
+                </View>
                 <View className={styles.meta}>
                   <Text className={classnames(styles.tag, categoryColors[post.category])}>
                     {categoryLabels[post.category]}
