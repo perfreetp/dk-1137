@@ -1,0 +1,70 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  min-height: 100vh;
+  background: $color-bg-gradient;
+  padding: $page-padding;
+}
+
+.list {
+  min-height: 60vh;
+}
+
+.replyCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.replyHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.replyUser {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-primary;
+  margin-right: 8rpx;
+}
+
+.replyTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.replyContent {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  margin-bottom: 12rpx;
+}
+
+.postPreview {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  padding: 12rpx;
+  background: $color-bg-page;
+  border-radius: $radius-sm;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+}
+
+.emptyIcon {
+  font-size: 120rpx;
+  margin-bottom: $spacing-lg;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}

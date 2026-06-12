@@ -2,24 +2,24 @@ import React, { useState } from 'react';
 import { View, Text, Input, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
-import { mockMoodHistory } from '../../data/users';
+import { useApp } from '../../components/AppProvider';
 import { MoodEntry } from '../../types';
 import styles from './index.module.scss';
 
 type MoodType = 'happy' | 'calm' | 'anxious' | 'sad' | 'angry';
 
+const moodOptions: { type: MoodType; emoji: string; label: string; color: string }[] = [
+  { type: 'happy', emoji: '😊', label: '开心', color: '#52C41A' },
+  { type: 'calm', emoji: '😌', label: '平静', color: '#1890FF' },
+  { type: 'anxious', emoji: '😰', label: '焦虑', color: '#FFA940' },
+  { type: 'sad', emoji: '😢', label: '难过', color: '#722ED1' },
+  { type: 'angry', emoji: '😠', label: '生气', color: '#F53F3F' }
+];
+
 const MoodPage: React.FC = () => {
+  const { moodHistory, addMoodEntry } = useApp();
   const [selectedMood, setSelectedMood] = useState<MoodType | null>(null);
   const [note, setNote] = useState('');
-  const [moodHistory, setMoodHistory] = useState<MoodEntry[]>(mockMoodHistory);
-
-  const moodOptions: { type: MoodType; emoji: string; label: string; color: string }[] = [
-    { type: 'happy', emoji: '😊', label: '开心', color: '#52C41A' },
-    { type: 'calm', emoji: '😌', label: '平静', color: '#1890FF' },
-    { type: 'anxious', emoji: '😰', label: '焦虑', color: '#FFA940' },
-    { type: 'sad', emoji: '😢', label: '难过', color: '#722ED1' },
-    { type: 'angry', emoji: '😠', label: '生气', color: '#F53F3F' }
-  ];
 
   const handleSubmit = () => {
     if (!selectedMood) {
@@ -27,14 +27,17 @@ const MoodPage: React.FC = () => {
       return;
     }
 
+    const today = new Date().toISOString().split('T')[0];
+    const existingIndex = moodHistory.findIndex(m => m.createdAt === today);
+
     const newEntry: MoodEntry = {
-      id: `m${Date.now()}`,
+      id: `m_${Date.now()}`,
       mood: selectedMood,
       note: note,
-      createdAt: new Date().toISOString().split('T')[0]
+      createdAt: today
     };
 
-    setMoodHistory([newEntry, ...moodHistory]);
+    addMoodEntry(newEntry);
     Taro.showToast({ title: '打卡成功', icon: 'success' });
     setSelectedMood(null);
     setNote('');
@@ -56,6 +59,8 @@ const MoodPage: React.FC = () => {
   };
 
   const last7Days = moodHistory.slice(0, 7).reverse();
+  
+  const barHeights = [60, 75, 45, 80, 55, 70, 65];
 
   return (
     <View className={styles.container}>
@@ -108,7 +113,7 @@ const MoodPage: React.FC = () => {
                   key={entry.id}
                   className={styles.chartBar}
                   style={{
-                    height: `${40 + Math.random() * 60}%`,
+                    height: `${barHeights[index] || 50}%`,
                     background: getMoodColor(entry.mood)
                   }}
                 >

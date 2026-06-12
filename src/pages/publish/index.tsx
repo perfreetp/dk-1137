@@ -2,21 +2,28 @@ import React, { useState } from 'react';
 import { View, Text, Textarea, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
+import { useApp } from '../../store/AppContext';
 import { mockTopics } from '../../data/topics';
-import { Topic } from '../../types';
+import { Topic, Post } from '../../types';
 import styles from './index.module.scss';
 
 type CategoryType = 'complaint' | 'help' | 'happy' | 'daily';
 type VisibilityType = 'department' | 'park';
 
-const categoryLabels = {
+const categoryLabels: Record<CategoryType, string> = {
   complaint: '吐槽',
   help: '求助',
   happy: '开心事',
   daily: '日常'
 };
 
+const visibilityLabels: Record<VisibilityType, string> = {
+  department: '仅同部门可见',
+  park: '全园区可见'
+};
+
 const PublishPage: React.FC = () => {
+  const { user, addPost } = useApp();
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [category, setCategory] = useState<CategoryType>('daily');
@@ -52,18 +59,43 @@ const PublishPage: React.FC = () => {
     }
     
     Taro.showLoading({ title: '发布中...' });
+    
+    const newPost: Post = {
+      id: `post_${Date.now()}`,
+      userId: user.id,
+      anonymousName: user.anonymousName,
+      content: content.trim(),
+      images: images.length > 0 ? images : undefined,
+      category,
+      visibility,
+      topicId: selectedTopic?.id,
+      topicName: selectedTopic?.name,
+      hugs: 0,
+      comments: 0,
+      isHugged: false,
+      isCollected: false,
+      createdAt: new Date().toLocaleString('zh-CN', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).replace(/\//g, '-')
+    };
+
     setTimeout(() => {
+      addPost(newPost);
       Taro.hideLoading();
       Taro.showToast({ title: '发布成功', icon: 'success' });
       setTimeout(() => {
         Taro.switchTab({ url: '/pages/home/index' });
       }, 1500);
-    }, 1000);
+    }, 800);
   };
 
   const categories: CategoryType[] = ['complaint', 'help', 'happy', 'daily'];
   const visibilities: { key: VisibilityType; label: string }[] = [
-    { key: 'department', label: '仅同部门' },
+    { key: 'department', label: '仅同部门可见' },
     { key: 'park', label: '全园区可见' }
   ];
 

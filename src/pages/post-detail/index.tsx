@@ -2,52 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, Input, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
-import { mockPosts } from '../../data/posts';
+import { useApp } from '../../components/AppProvider';
 import { Post, Comment } from '../../types';
 import styles from './index.module.scss';
 
-const categoryLabels = {
+const categoryLabels: Record<string, string> = {
   complaint: '吐槽',
   help: '求助',
   happy: '开心事',
   daily: '日常'
 };
 
-const categoryColors = {
+const categoryColors: Record<string, string> = {
   complaint: styles.tagComplaint,
   help: styles.tagHelp,
   happy: styles.tagHappy,
   daily: styles.tagDaily
 };
 
-const mockComments: Comment[] = [
-  {
-    id: 'c1',
-    postId: '1',
-    userId: 'user1',
-    anonymousName: '匿名企鹅',
-    content: '感同身受！我之前也是这样，后来学会了用邮件留证据，领导也不敢随便甩锅了',
-    createdAt: '2024-01-15 11:30'
-  },
-  {
-    id: 'c2',
-    postId: '1',
-    userId: 'user2',
-    anonymousName: '匿名小熊',
-    content: '抱抱你，加油！ 💪',
-    createdAt: '2024-01-15 11:15'
-  },
-  {
-    id: 'c3',
-    postId: '1',
-    userId: 'user3',
-    anonymousName: '匿名狐狸',
-    content: '可以试试和领导沟通一下，说明自己的工作量，实在不行就勇敢说不',
-    createdAt: '2024-01-15 10:45'
-  }
-];
-
 const PostDetailPage: React.FC = () => {
+  const { getPost, getComments, user, updatePost, comments: allComments } = useApp();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState('');
@@ -55,16 +29,20 @@ const PostDetailPage: React.FC = () => {
   useEffect(() => {
     const { id } = Taro.getCurrentInstance().router?.params || {};
     if (id) {
-      const foundPost = mockPosts.find(p => p.id === id);
+      const foundPost = getPost(id);
       if (foundPost) {
         setPost(foundPost);
-        setComments(mockComments.filter(c => c.postId === id));
+        setComments(getComments(id));
       }
     }
-  }, []);
+  }, [allComments]);
 
   const handleHug = () => {
     if (post) {
+      updatePost(post.id, {
+        hugs: post.isHugged ? post.hugs - 1 : post.hugs + 1,
+        isHugged: !post.isHugged
+      });
       setPost({
         ...post,
         hugs: post.isHugged ? post.hugs - 1 : post.hugs + 1,
@@ -79,10 +57,8 @@ const PostDetailPage: React.FC = () => {
 
   const handleCollect = () => {
     if (post) {
-      setPost({
-        ...post,
-        isCollected: !post.isCollected
-      });
+      updatePost(post.id, { isCollected: !post.isCollected });
+      setPost({ ...post, isCollected: !post.isCollected });
       Taro.showToast({
         title: post.isCollected ? '已取消收藏' : '已收藏',
         icon: 'success'
@@ -107,19 +83,10 @@ const PostDetailPage: React.FC = () => {
       Taro.showToast({ title: '请输入评论', icon: 'none' });
       return;
     }
-
-    const newComment: Comment = {
-      id: `c${Date.now()}`,
-      postId: post?.id || '',
-      userId: 'currentUser',
-      anonymousName: '匿名树洞',
-      content: commentText,
-      createdAt: new Date().toLocaleString()
-    };
-
-    setComments([...comments, newComment]);
-    setCommentText('');
     Taro.showToast({ title: '评论成功', icon: 'success' });
+    setTimeout(() => {
+      Taro.navigateBack();
+    }, 1000);
   };
 
   if (!post) {
@@ -148,7 +115,7 @@ const PostDetailPage: React.FC = () => {
                     {categoryLabels[post.category]}
                   </Text>
                   {post.visibility === 'department' && (
-                    <Text className={styles.visibilityTag}>只看同部门</Text>
+                    <Text className={styles.visibilityTag}>仅同部门可见</Text>
                   )}
                 </View>
               </View>

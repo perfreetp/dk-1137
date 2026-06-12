@@ -1,32 +1,31 @@
 import React, { useState } from 'react';
 import { View, Text, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
-import { mockBlockedKeywords, mockCurrentUser } from '../../data/users';
+import { useApp } from '../../components/AppProvider';
 import styles from './index.module.scss';
 
 const SettingsPage: React.FC = () => {
-  const [nickname, setNickname] = useState(mockCurrentUser.anonymousName);
-  const [blockedKeywords, setBlockedKeywords] = useState(mockBlockedKeywords);
+  const { user, updateNickname, blockedKeywords, addBlockedKeyword, removeBlockedKeyword } = useApp();
+  const [nickname, setNickname] = useState(user.anonymousName);
   const [newKeyword, setNewKeyword] = useState('');
 
   const handleNicknameSave = () => {
     if (nickname.trim()) {
+      updateNickname(nickname.trim());
       Taro.showToast({ title: '保存成功', icon: 'success' });
     }
   };
 
   const handleAddKeyword = () => {
     if (newKeyword.trim()) {
-      setBlockedKeywords([...blockedKeywords, newKeyword.trim()]);
+      addBlockedKeyword(newKeyword.trim());
       setNewKeyword('');
       Taro.showToast({ title: '添加成功', icon: 'success' });
     }
   };
 
-  const handleRemoveKeyword = (index: number) => {
-    const newList = [...blockedKeywords];
-    newList.splice(index, 1);
-    setBlockedKeywords(newList);
+  const handleRemoveKeyword = (keyword: string) => {
+    removeBlockedKeyword(keyword);
     Taro.showToast({ title: '已移除', icon: 'success' });
   };
 
@@ -72,17 +71,23 @@ const SettingsPage: React.FC = () => {
       <View className={styles.section}>
         <Text className={styles.sectionTitle}>关键词屏蔽</Text>
         <View className={styles.blockedList}>
-          {blockedKeywords.map((keyword, index) => (
-            <View key={index} className={styles.blockedItem}>
-              <Text className={styles.blockedWord}>{keyword}</Text>
-              <Text 
-                className={styles.removeButton}
-                onClick={() => handleRemoveKeyword(index)}
-              >
-                删除
-              </Text>
-            </View>
-          ))}
+          {blockedKeywords.length === 0 ? (
+            <Text style={{ color: '#999', fontSize: '24rpx', textAlign: 'center', padding: '20rpx' }}>
+              暂无屏蔽词
+            </Text>
+          ) : (
+            blockedKeywords.map((keyword, index) => (
+              <View key={index} className={styles.blockedItem}>
+                <Text className={styles.blockedWord}>{keyword}</Text>
+                <Text 
+                  className={styles.removeButton}
+                  onClick={() => handleRemoveKeyword(keyword)}
+                >
+                  删除
+                </Text>
+              </View>
+            ))
+          )}
           <View style={{ display: 'flex', gap: '12rpx', marginTop: '16rpx' }}>
             <Input
               style={{
@@ -110,6 +115,9 @@ const SettingsPage: React.FC = () => {
               <Text style={{ color: '#fff', fontSize: '28rpx' }}>添加</Text>
             </View>
           </View>
+          <Text style={{ fontSize: '22rpx', color: '#999', marginTop: '16rpx' }}>
+            添加屏蔽词后，包含该词的帖子将在首页、话题详情等位置被过滤
+          </Text>
         </View>
       </View>
 

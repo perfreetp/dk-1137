@@ -26,7 +26,11 @@ const MessagesPage: React.FC = () => {
       ));
     }
     
-    if (message.postId) {
+    if (message.type === 'private' && message.fromUserId) {
+      Taro.navigateTo({ 
+        url: `/pages/chat/index?fromId=${message.fromUserId}&fromName=${encodeURIComponent(message.fromAnonymousName || '')}` 
+      });
+    } else if (message.postId) {
       Taro.navigateTo({ url: `/pages/post-detail/index?id=${message.postId}` });
     }
   };

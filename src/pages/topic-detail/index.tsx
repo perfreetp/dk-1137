@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
+import { useApp } from '../../components/AppProvider';
 import { mockTopics } from '../../data/topics';
-import { mockPosts } from '../../data/posts';
 import PostCard from '../../components/PostCard';
 import styles from './index.module.scss';
 
 const TopicDetailPage: React.FC = () => {
+  const { posts, blockedKeywords, updatePost } = useApp();
   const [topic, setTopic] = useState<any>(null);
-  const [posts, setPosts] = useState<any[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
 
   useEffect(() => {
     const { id } = Taro.getCurrentInstance().router?.params || {};
@@ -16,10 +17,49 @@ const TopicDetailPage: React.FC = () => {
       const foundTopic = mockTopics.find(t => t.id === id);
       if (foundTopic) {
         setTopic(foundTopic);
-        setPosts(mockPosts.filter(p => p.topicId === id));
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (topic) {
+      let result = posts.filter(p => p.topicId === topic.id);
+      
+      if (blockedKeywords.length > 0) {
+        result = result.filter(post => {
+          const content = post.content.toLowerCase();
+          return !blockedKeywords.some(keyword => content.includes(keyword.toLowerCase()));
+        });
+      }
+      
+      setFilteredPosts(result);
+    }
+  }, [posts, topic, blockedKeywords]);
+
+  const handleHug = (postId: string) => {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      updatePost(postId, {
+        hugs: post.isHugged ? post.hugs - 1 : post.hugs + 1,
+        isHugged: !post.isHugged
+      });
+    }
+  };
+
+  const handleComment = (postId: string) => {
+    Taro.navigateTo({ url: `/pages/comments/index?postId=${postId}` });
+  };
+
+  const handleCollect = (postId: string) => {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      updatePost(postId, { isCollected: !post.isCollected });
+    }
+  };
+
+  const handlePostClick = (postId: string) => {
+    Taro.navigateTo({ url: `/pages/post-detail/index?id=${postId}` });
+  };
 
   if (!topic) {
     return (
@@ -44,21 +84,32 @@ const TopicDetailPage: React.FC = () => {
           </View>
         </View>
         <View className={styles.stats}>
-          <Text className={styles.stat}>{topic.postCount}篇帖子</Text>
+          <Text className={styles.stat}>{filteredPosts.length}篇帖子</Text>
           <Text className={styles.stat}>{topic.isFollowed ? '已关注' : '未关注'}</Text>
         </View>
       </View>
 
       <ScrollView className={styles.content} scrollY>
-        {posts.length > 0 ? (
-          posts.map(post => (
-            <PostCard key={post.id} post={post} />
+        {filteredPosts.length > 0 ? (
+          filteredPosts.map(post => (
+            <PostCard
+              key={post.id}
+              post={post}
+              onHug={handleHug}
+              onComment={handleComment}
+              onCollect={handleCollect}
+              onClick={handlePostClick}
+            />
           ))
         ) : (
           <View className={styles.placeholder}>
             <Text className={styles.icon}>📭</Text>
             <Text className={styles.title}>暂无帖子</Text>
-            <Text className={styles.desc}>该话题下还没有帖子，快来发布第一篇吧~</Text>
+            <Text className={styles.desc}>
+              {blockedKeywords.length > 0 
+                ? '当前设置了屏蔽词，部分内容已被过滤'
+                : '该话题下还没有帖子，快来发布第一篇吧~'}
+            </Text>
           </View>
         )}
       </ScrollView>

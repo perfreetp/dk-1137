@@ -9,7 +9,11 @@ export default defineAppConfig({
     'pages/comments/index',
     'pages/topic-detail/index',
     'pages/settings/index',
-    'pages/mood/index'
+    'pages/mood/index',
+    'pages/my-posts/index',
+    'pages/my-replies/index',
+    'pages/my-collections/index',
+    'pages/chat/index'
   ],
   window: {
     backgroundTextStyle: 'light',

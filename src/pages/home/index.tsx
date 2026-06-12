@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, PullToRefresh } from '@tarojs/components';
+import { View, Text, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
+import { useApp } from '../../components/AppProvider';
 import PostCard from '../../components/PostCard';
 import EmptyState from '../../components/EmptyState';
-import { mockPosts } from '../../data/posts';
 import { Post } from '../../types';
 import styles from './index.module.scss';
 
@@ -12,51 +12,60 @@ type CategoryType = 'all' | 'complaint' | 'help' | 'happy' | 'daily';
 type SortType = 'hot' | 'latest';
 
 const HomePage: React.FC = () => {
+  const { posts, blockedKeywords, updatePost } = useApp();
   const [category, setCategory] = useState<CategoryType>('all');
-  const [sortType, setSortType] = useState<SortType>('hot');
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [sortType, setSortType] = useState<SortType>('latest');
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadPosts();
-  }, [category, sortType]);
+    filterAndSortPosts();
+  }, [posts, category, sortType, blockedKeywords]);
 
-  const loadPosts = () => {
-    let filtered = [...mockPosts];
+  const filterAndSortPosts = () => {
+    let result = [...posts];
+    
+    if (blockedKeywords.length > 0) {
+      result = result.filter(post => {
+        const content = post.content.toLowerCase();
+        return !blockedKeywords.some(keyword => content.includes(keyword.toLowerCase()));
+      });
+    }
     
     if (category !== 'all') {
-      filtered = filtered.filter(p => p.category === category);
+      result = result.filter(p => p.category === category);
     }
 
     if (sortType === 'hot') {
-      filtered.sort((a, b) => b.hugs - a.hugs);
+      result.sort((a, b) => b.hugs - a.hugs);
     } else {
-      filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      result.sort((a, b) => {
+        const dateA = new Date(a.createdAt.replace(/\//g, '-')).getTime();
+        const dateB = new Date(b.createdAt.replace(/\//g, '-')).getTime();
+        return dateB - dateA;
+      });
     }
 
-    setPosts(filtered);
+    setFilteredPosts(result);
   };
 
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
-      loadPosts();
+      filterAndSortPosts();
       setRefreshing(false);
       Taro.showToast({ title: '刷新成功', icon: 'success' });
     }, 1000);
   };
 
   const handleHug = (postId: string) => {
-    setPosts(prev => prev.map(p => {
-      if (p.id === postId) {
-        return {
-          ...p,
-          hugs: p.isHugged ? p.hugs - 1 : p.hugs + 1,
-          isHugged: !p.isHugged
-        };
-      }
-      return p;
-    }));
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      updatePost(postId, {
+        hugs: post.isHugged ? post.hugs - 1 : post.hugs + 1,
+        isHugged: !post.isHugged
+      });
+    }
   };
 
   const handleComment = (postId: string) => {
@@ -64,17 +73,14 @@ const HomePage: React.FC = () => {
   };
 
   const handleCollect = (postId: string) => {
-    setPosts(prev => prev.map(p => {
-      if (p.id === postId) {
-        return { ...p, isCollected: !p.isCollected };
-      }
-      return p;
-    }));
     const post = posts.find(p => p.id === postId);
-    Taro.showToast({
-      title: post?.isCollected ? '已取消收藏' : '已收藏',
-      icon: 'success'
-    });
+    if (post) {
+      updatePost(postId, { isCollected: !post.isCollected });
+      Taro.showToast({
+        title: post.isCollected ? '已取消收藏' : '已收藏',
+        icon: 'success'
+      });
+    }
   };
 
   const handlePostClick = (postId: string) => {
@@ -137,8 +143,8 @@ const HomePage: React.FC = () => {
         refresherTriggered={refreshing}
         onRefresherRefresh={onRefresh}
       >
-        {posts.length > 0 ? (
-          posts.map(post => (
+        {filteredPosts.length > 0 ? (
+          filteredPosts.map(post => (
             <PostCard
               key={post.id}
               post={post}
@@ -152,7 +158,9 @@ const HomePage: React.FC = () => {
           <EmptyState
             icon='🌿'
             title='暂无内容'
-            description='还没有人发布内容，快来成为第一个分享者吧~'
+            description={blockedKeywords.length > 0 
+              ? '当前设置了屏蔽词，部分内容已被过滤' 
+              : '还没有人发布内容，快来成为第一个分享者吧~'}
           />
         )}
       </ScrollView>

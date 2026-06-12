@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text } from '@tarojs/components';
 import Taro from '@tarojs/taro';
-import { mockCurrentUser } from '../../data/users';
-import { mockPosts } from '../../data/posts';
-import { mockMoodHistory } from '../../data/users';
+import { useApp } from '../../components/AppProvider';
 import styles from './index.module.scss';
 
 const ProfilePage: React.FC = () => {
-  const user = mockCurrentUser;
-  const myPosts = mockPosts.filter(p => p.userId === 'currentUser');
-  const todayMood = mockMoodHistory[0];
-  const followedTopicsCount = 3;
+  const { user, myPosts, moodHistory } = useApp();
+  
+  const todayMood = moodHistory[0];
 
   const moodEmojis = {
     happy: '😊',
@@ -43,36 +40,30 @@ const ProfilePage: React.FC = () => {
       icon: '📝',
       title: '我的发布',
       desc: `${myPosts.length}篇帖子`,
-      path: '/pages/profile/index?tab=posts'
+      path: '/pages/my-posts/index'
     },
     {
       icon: '💬',
       title: '我的回复',
       desc: '查看所有回复',
-      path: '/pages/profile/index?tab=replies'
+      path: '/pages/my-replies/index'
     },
     {
       icon: '⭐',
       title: '我的收藏',
       desc: '收藏的帖子',
-      path: '/pages/profile/index?tab=collections'
+      path: '/pages/my-collections/index'
     },
     {
       icon: '🏷️',
       title: '我的话题',
-      desc: `关注了${followedTopicsCount}个话题`,
+      desc: '关注的话题',
       path: '/pages/topics/index'
     },
     {
       icon: '🛡️',
       title: '关键词屏蔽',
       desc: '设置屏蔽词',
-      path: '/pages/settings/index'
-    },
-    {
-      icon: '🚩',
-      title: '举报记录',
-      desc: '查看举报历史',
       path: '/pages/settings/index'
     },
     {
@@ -94,7 +85,7 @@ const ProfilePage: React.FC = () => {
           </View>
           <View className={styles.profileInfo}>
             <Text className={styles.nickname}>{user.anonymousName}</Text>
-            <Text className={styles.department}>{user.department} · 加入于{user.createdAt}</Text>
+            <Text className={styles.department}>{user.department}</Text>
           </View>
         </View>
 
@@ -108,7 +99,7 @@ const ProfilePage: React.FC = () => {
             <Text className={styles.statLabel}>收到拥抱</Text>
           </View>
           <View className={styles.statItem}>
-            <Text className={styles.statValue}>{followedTopicsCount}</Text>
+            <Text className={styles.statValue}>3</Text>
             <Text className={styles.statLabel}>关注话题</Text>
           </View>
         </View>
@@ -116,11 +107,11 @@ const ProfilePage: React.FC = () => {
 
       <View className={styles.quickActions}>
         <View className={styles.actionGrid}>
-          <View className={styles.actionItem} onClick={() => handleMenuClick('/pages/profile/index?tab=posts')}>
+          <View className={styles.actionItem} onClick={() => handleMenuClick('/pages/my-posts/index')}>
             <Text className={styles.actionIcon}>📝</Text>
             <Text className={styles.actionLabel}>我的发布</Text>
           </View>
-          <View className={styles.actionItem} onClick={() => handleMenuClick('/pages/profile/index?tab=collections')}>
+          <View className={styles.actionItem} onClick={() => handleMenuClick('/pages/my-collections/index')}>
             <Text className={styles.actionIcon}>⭐</Text>
             <Text className={styles.actionLabel}>我的收藏</Text>
           </View>
