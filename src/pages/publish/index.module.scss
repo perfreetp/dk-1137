@@ -1,0 +1,255 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  min-height: 100vh;
+  background: $color-bg-gradient;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: $color-bg-card;
+  padding: $spacing-lg $page-padding;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.title {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  margin-bottom: $spacing-md;
+}
+
+.content {
+  flex: 1;
+  padding: $page-padding;
+}
+
+.inputArea {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  min-height: 300rpx;
+  box-shadow: $shadow-card;
+}
+
+.textarea {
+  width: 100%;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: 1.8;
+  min-height: 240rpx;
+  border: none;
+  resize: none;
+
+  &::placeholder {
+    color: $color-text-tertiary;
+  }
+}
+
+.imageSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.sectionTitle {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-md;
+}
+
+.imageList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.imageItem {
+  position: relative;
+  width: 180rpx;
+  height: 180rpx;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  border-radius: $radius-md;
+}
+
+.removeImage {
+  position: absolute;
+  top: -12rpx;
+  right: -12rpx;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: $radius-round;
+  background: $color-error;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: $font-weight-bold;
+}
+
+.addImage {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: $radius-md;
+  border: 2rpx dashed $color-border;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.8;
+    transform: scale(0.95);
+  }
+}
+
+.addImageIcon {
+  font-size: 60rpx;
+  color: $color-text-tertiary;
+}
+
+.addImageText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.optionsSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.optionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md 0;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.optionLabel {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.categoryOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.categoryItem {
+  padding: 10rpx 24rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  background: $color-bg-page;
+  color: $color-text-secondary;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.categoryItemActive {
+  background: $color-bg-hover;
+  color: $color-primary;
+  border-color: $color-primary;
+}
+
+.visibilityOptions {
+  display: flex;
+  gap: 12rpx;
+}
+
+.visibilityItem {
+  padding: 10rpx 24rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  background: $color-bg-page;
+  color: $color-text-secondary;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.visibilityItemActive {
+  background: $color-bg-hover;
+  color: $color-primary;
+  border-color: $color-primary;
+}
+
+.topicSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.topicInput {
+  width: 100%;
+  padding: 16rpx;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  background: $color-bg-page;
+
+  &:focus {
+    border-color: $color-primary;
+  }
+
+  &::placeholder {
+    color: $color-text-tertiary;
+  }
+}
+
+.submitSection {
+  padding: 0 $page-padding $spacing-xl;
+}
+
+.submitButton {
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  border: none;
+  transition: all $transition-base;
+  box-shadow: 0 4rpx 20rpx rgba($color-primary, 0.3);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    background: $color-text-disabled;
+    box-shadow: none;
+  }
+}

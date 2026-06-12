@@ -1,0 +1,104 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  min-height: 100vh;
+  background: $color-bg-gradient;
+  padding: $spacing-md $page-padding;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: $color-bg-gradient;
+  padding: $spacing-sm 0;
+  margin-bottom: $spacing-sm;
+}
+
+.title {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  margin-bottom: $spacing-md;
+}
+
+.filters {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.filterItem {
+  flex-shrink: 0;
+  padding: 12rpx 28rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  background: $color-bg-card;
+  border: 2rpx solid $color-border;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.filterActive {
+  background: $color-primary;
+  color: $color-text-white;
+  border-color: $color-primary;
+}
+
+.tabs {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+  border-bottom: 2rpx solid $color-border;
+  padding-bottom: $spacing-sm;
+}
+
+.tab {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+  padding: 8rpx 0;
+  position: relative;
+  transition: all $transition-base;
+}
+
+.tabActive {
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10rpx;
+    left: 0;
+    right: 0;
+    height: 4rpx;
+    background: $color-primary;
+    border-radius: 2rpx;
+  }
+}
+
+.content {
+  min-height: 60vh;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl;
+}
+
+.loadingText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}

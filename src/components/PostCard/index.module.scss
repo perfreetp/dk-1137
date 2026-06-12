@@ -1,0 +1,169 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: $spacing-md;
+}
+
+.avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-round;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.avatarText {
+  font-size: $font-size-lg;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}
+
+.userInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.userName {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.tag {
+  font-size: $font-size-xs;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-xs;
+  font-weight: $font-weight-medium;
+}
+
+.tagComplaint {
+  background: $color-tag-complaint;
+  color: #d4380d;
+}
+
+.tagHelp {
+  background: $color-tag-help;
+  color: #1677ff;
+}
+
+.tagHappy {
+  background: $color-tag-happy;
+  color: #389e0d;
+}
+
+.tagDaily {
+  background: $color-tag-daily;
+  color: #d46b08;
+}
+
+.visibilityTag {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  background: $color-bg-hover;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+}
+
+.topicBadge {
+  flex-shrink: 0;
+}
+
+.topicText {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  background: $color-bg-hover;
+  padding: 6rpx 16rpx;
+  border-radius: $radius-xs;
+  font-weight: $font-weight-medium;
+}
+
+.content {
+  margin-bottom: $spacing-md;
+}
+
+.text {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: 1.8;
+}
+
+.images {
+  display: flex;
+  gap: 8rpx;
+  margin-bottom: $spacing-md;
+  overflow: hidden;
+}
+
+.image {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  padding-top: $spacing-sm;
+  border-top: 1rpx solid $color-divider;
+}
+
+.actionItem {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 8rpx 20rpx;
+  margin-right: $spacing-sm;
+  border-radius: $radius-button;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.8;
+    transform: scale(0.95);
+  }
+}
+
+.actionActive {
+  background: $color-bg-hover;
+}
+
+.actionIcon {
+  font-size: $font-size-md;
+}
+
+.actionCount {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.time {
+  flex: 1;
+  text-align: right;
+}
+
+.timeText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
