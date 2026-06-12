@@ -46,6 +46,11 @@
   flex: 1;
 }
 
+.privateHint {
+  font-size: $font-size-xs;
+  color: $color-primary;
+}
+
 .userName {
   font-size: $font-size-md;
   font-weight: $font-weight-semibold;

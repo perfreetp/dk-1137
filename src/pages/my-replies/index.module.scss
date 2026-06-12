@@ -10,6 +10,19 @@
   min-height: 60vh;
 }
 
+.blockedBadge {
+  background: rgba($color-error, 0.1);
+  padding: 8rpx 16rpx;
+  border-radius: $radius-xs;
+  margin-bottom: 12rpx;
+  display: inline-block;
+}
+
+.blockedText {
+  font-size: $font-size-xs;
+  color: $color-error;
+}
+
 .replyCard {
   background: $color-bg-card;
   border-radius: $radius-lg;

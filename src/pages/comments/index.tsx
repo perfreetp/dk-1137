@@ -52,9 +52,12 @@ const CommentsPage: React.FC = () => {
     };
 
     addComment(postId, newComment);
-    setCommentList([...commentList, newComment]);
     setCommentText('');
     Taro.showToast({ title: '评论成功', icon: 'success' });
+    
+    setTimeout(() => {
+      Taro.navigateBack();
+    }, 1000);
   };
 
   return (

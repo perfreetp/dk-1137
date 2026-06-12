@@ -95,7 +95,7 @@ const PublishPage: React.FC = () => {
 
   const categories: CategoryType[] = ['complaint', 'help', 'happy', 'daily'];
   const visibilities: { key: VisibilityType; label: string }[] = [
-    { key: 'department', label: '仅同部门可见' },
+    { key: 'department', label: '仅同部门外可见' },
     { key: 'park', label: '全园区可见' }
   ];
 

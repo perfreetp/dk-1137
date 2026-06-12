@@ -11,18 +11,26 @@ type MessageType = 'all' | 'comment' | 'hug' | 'private';
 const MessagesPage: React.FC = () => {
   const { privateMessages } = useApp();
   const [activeTab, setActiveTab] = useState<MessageType>('all');
-  const [messages, setMessages] = useState<any[]>(mockMessages);
+  const [messages, setMessages] = useState<any[]>([]);
 
   useEffect(() => {
-    const allMessages = [...privateMessages.map(pm => ({
-      id: pm.id,
-      type: 'private' as const,
-      fromUserId: pm.fromUserId,
-      fromAnonymousName: pm.fromAnonymousName,
-      content: pm.content,
-      isRead: pm.isRead,
-      createdAt: pm.createdAt
-    })), ...mockMessages];
+    const allMessages = [
+      ...privateMessages.map(pm => ({
+        id: pm.id,
+        type: 'private' as const,
+        fromUserId: pm.fromUserId,
+        fromAnonymousName: pm.fromAnonymousName,
+        content: pm.content,
+        isRead: pm.isRead,
+        createdAt: pm.createdAt
+      })),
+      ...mockMessages
+    ];
+    allMessages.sort((a, b) => {
+      const dateA = new Date(a.createdAt.replace(/\//g, '-')).getTime();
+      const dateB = new Date(b.createdAt.replace(/\//g, '-')).getTime();
+      return dateB - dateA;
+    });
     setMessages(allMessages);
   }, [privateMessages]);
 

@@ -21,7 +21,7 @@ const categoryColors: Record<string, string> = {
 };
 
 const PostDetailPage: React.FC = () => {
-  const { getPost, getComments, user, updatePost, comments: allComments, addComment } = useApp();
+  const { getPost, getComments, user, updatePost, comments: allComments, addComment, addPrivateMessage } = useApp();
   const [post, setPost] = useState<Post | null>(null);
   const [commentList, setCommentList] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState('');
@@ -46,6 +46,14 @@ const PostDetailPage: React.FC = () => {
       setCommentList(getComments(post.id));
     }
   }, [allComments]);
+
+  const handleAuthorClick = () => {
+    if (post && post.userId !== user.id) {
+      Taro.navigateTo({ 
+        url: `/pages/chat/index?fromId=${post.userId}&fromName=${encodeURIComponent(post.anonymousName)}` 
+      });
+    }
+  };
 
   const handleHug = () => {
     if (post) {
@@ -128,13 +136,22 @@ const PostDetailPage: React.FC = () => {
         <View className={styles.postSection}>
           <View className={styles.postCard}>
             <View className={styles.postHeader}>
-              <View className={styles.avatar}>
+              <View 
+                className={styles.avatar}
+                onClick={handleAuthorClick}
+              >
                 <Text className={styles.avatarText}>
                   {post.anonymousName.charAt(0)}
                 </Text>
               </View>
               <View className={styles.userInfo}>
-                <Text className={styles.userName}>{post.anonymousName}</Text>
+                <Text 
+                  className={styles.userName}
+                  onClick={handleAuthorClick}
+                >
+                  {post.anonymousName}
+                  {post.userId !== user.id && <Text className={styles.privateHint}> 💬</Text>}
+                </Text>
                 <View className={styles.meta}>
                   <Text className={classnames(styles.tag, categoryColors[post.category])}>
                     {categoryLabels[post.category]}
