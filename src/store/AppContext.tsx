@@ -5,6 +5,24 @@ import { mockPosts } from '../data/posts';
 import { mockComments } from '../data/comments';
 import { mockMoodHistory, mockCurrentUser } from '../data/users';
 
+interface ChatMessage {
+  id: string;
+  fromUserId: string;
+  fromName: string;
+  content: string;
+  createdAt: string;
+}
+
+interface PrivateMessage {
+  id: string;
+  type: 'private';
+  fromUserId: string;
+  fromAnonymousName: string;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
 interface AppContextType {
   user: {
     id: string;
@@ -22,6 +40,10 @@ interface AppContextType {
   comments: Record<string, Comment[]>;
   addComment: (postId: string, comment: Comment) => void;
   getComments: (postId: string) => Comment[];
+  
+  privateMessages: PrivateMessage[];
+  addPrivateMessage: (message: PrivateMessage) => void;
+  markMessageRead: (messageId: string) => void;
   
   blockedKeywords: string[];
   addBlockedKeyword: (keyword: string) => void;
@@ -50,6 +72,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
   const [blockedKeywords, setBlockedKeywords] = useState<string[]>([]);
   const [moodHistory, setMoodHistory] = useState<MoodEntry[]>(mockMoodHistory);
+  const [privateMessages, setPrivateMessages] = useState<PrivateMessage[]>([]);
 
   useEffect(() => {
     const savedUser = Taro.getStorageSync('user');
@@ -63,6 +86,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     
     const savedMood = Taro.getStorageSync('moodHistory');
     if (savedMood) setMoodHistory(savedMood);
+    
+    const savedMessages = Taro.getStorageSync('privateMessages');
+    if (savedMessages) setPrivateMessages(savedMessages);
   }, []);
 
   useEffect(() => {
@@ -81,6 +107,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     Taro.setStorageSync('moodHistory', moodHistory);
   }, [moodHistory]);
 
+  useEffect(() => {
+    Taro.setStorageSync('privateMessages', privateMessages);
+  }, [privateMessages]);
+
   const updateNickname = (name: string) => {
     setUser(prev => ({ ...prev, anonymousName: name }));
   };
@@ -98,17 +128,31 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addComment = (postId: string, comment: Comment) => {
-    setComments(prev => ({
-      ...prev,
-      [postId]: [...(prev[postId] || []), comment]
-    }));
-    updatePost(postId, {
-      comments: (comments[postId]?.length || 0) + 1
+    setComments(prev => {
+      const existingComments = prev[postId] || [];
+      const newComments = [...existingComments, comment];
+      setPosts(posts => posts.map(p => {
+        if (p.id === postId) {
+          return { ...p, comments: newComments.length };
+        }
+        return p;
+      }));
+      return { ...prev, [postId]: newComments };
     });
   };
 
   const getComments = (postId: string) => {
     return comments[postId] || [];
+  };
+
+  const addPrivateMessage = (message: PrivateMessage) => {
+    setPrivateMessages(prev => [message, ...prev]);
+  };
+
+  const markMessageRead = (messageId: string) => {
+    setPrivateMessages(prev => prev.map(m => 
+      m.id === messageId ? { ...m, isRead: true } : m
+    ));
   };
 
   const addBlockedKeyword = (keyword: string) => {
@@ -140,6 +184,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       comments,
       addComment,
       getComments,
+      privateMessages,
+      addPrivateMessage,
+      markMessageRead,
       blockedKeywords,
       addBlockedKeyword,
       removeBlockedKeyword,

@@ -6,10 +6,10 @@ import { Comment } from '../../types';
 import styles from './index.module.scss';
 
 const CommentsPage: React.FC = () => {
-  const { getPost, getComments, addComment, user } = useApp();
+  const { getPost, getComments, addComment, user, comments: allComments } = useApp();
   const [postId, setPostId] = useState<string>('');
   const [post, setPost] = useState<any>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentList, setCommentList] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState('');
 
   useEffect(() => {
@@ -19,10 +19,16 @@ const CommentsPage: React.FC = () => {
       const foundPost = getPost(pid);
       if (foundPost) {
         setPost(foundPost);
-        setComments(getComments(pid));
+        setCommentList(getComments(pid));
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (postId) {
+      setCommentList(getComments(postId));
+    }
+  }, [allComments, postId]);
 
   const handleSend = () => {
     if (!commentText.trim()) {
@@ -46,7 +52,7 @@ const CommentsPage: React.FC = () => {
     };
 
     addComment(postId, newComment);
-    setComments([...comments, newComment]);
+    setCommentList([...commentList, newComment]);
     setCommentText('');
     Taro.showToast({ title: '评论成功', icon: 'success' });
   };
@@ -63,9 +69,9 @@ const CommentsPage: React.FC = () => {
       )}
 
       <ScrollView className={styles.commentsList} scrollY>
-        <Text className={styles.commentsTitle}>全部评论 ({comments.length})</Text>
-        {comments.length > 0 ? (
-          comments.map(comment => (
+        <Text className={styles.commentsTitle}>全部评论 ({commentList.length})</Text>
+        {commentList.length > 0 ? (
+          commentList.map(comment => (
             <View key={comment.id} className={styles.commentItem}>
               <View className={styles.commentHeader}>
                 <View className={styles.avatar}>

@@ -21,9 +21,9 @@ const categoryColors: Record<string, string> = {
 };
 
 const PostDetailPage: React.FC = () => {
-  const { getPost, getComments, user, updatePost, comments: allComments } = useApp();
+  const { getPost, getComments, user, updatePost, comments: allComments, addComment } = useApp();
   const [post, setPost] = useState<Post | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentList, setCommentList] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState('');
 
   useEffect(() => {
@@ -32,8 +32,18 @@ const PostDetailPage: React.FC = () => {
       const foundPost = getPost(id);
       if (foundPost) {
         setPost(foundPost);
-        setComments(getComments(id));
+        setCommentList(getComments(id));
       }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (post) {
+      const currentPost = getPost(post.id);
+      if (currentPost) {
+        setPost(currentPost);
+      }
+      setCommentList(getComments(post.id));
     }
   }, [allComments]);
 
@@ -83,10 +93,25 @@ const PostDetailPage: React.FC = () => {
       Taro.showToast({ title: '请输入评论', icon: 'none' });
       return;
     }
+
+    const newComment: Comment = {
+      id: `comment_${Date.now()}`,
+      postId: post?.id || '',
+      userId: user.id,
+      anonymousName: user.anonymousName,
+      content: commentText.trim(),
+      createdAt: new Date().toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).replace(/\//g, '-')
+    };
+
+    addComment(post?.id || '', newComment);
+    setCommentText('');
     Taro.showToast({ title: '评论成功', icon: 'success' });
-    setTimeout(() => {
-      Taro.navigateBack();
-    }, 1000);
   };
 
   if (!post) {
@@ -115,7 +140,7 @@ const PostDetailPage: React.FC = () => {
                     {categoryLabels[post.category]}
                   </Text>
                   {post.visibility === 'department' && (
-                    <Text className={styles.visibilityTag}>仅同部门可见</Text>
+                    <Text className={styles.visibilityTag}>仅同部门外可见</Text>
                   )}
                 </View>
               </View>
@@ -168,12 +193,12 @@ const PostDetailPage: React.FC = () => {
         <View className={styles.commentsSection}>
           <View className={styles.sectionHeader}>
             <Text className={styles.sectionTitle}>评论</Text>
-            <Text className={styles.commentCount}>{comments.length}条评论</Text>
+            <Text className={styles.commentCount}>{commentList.length}条评论</Text>
           </View>
 
-          {comments.length > 0 ? (
+          {commentList.length > 0 ? (
             <View className={styles.commentList}>
-              {comments.map(comment => (
+              {commentList.map(comment => (
                 <View key={comment.id} className={styles.commentItem}>
                   <View className={styles.commentHeader}>
                     <View className={styles.commentAvatar}>

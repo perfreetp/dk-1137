@@ -1,13 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useApp } from '../../components/AppProvider';
 import PostCard from '../../components/PostCard';
-import EmptyState from '../../components/EmptyState';
 import styles from './index.module.scss';
 
 const MyCollectionsPage: React.FC = () => {
-  const { myCollections, updatePost } = useApp();
+  const { myCollections, blockedKeywords, updatePost } = useApp();
+  const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    filterPosts();
+  }, [myCollections, blockedKeywords]);
+
+  const filterPosts = () => {
+    if (blockedKeywords.length === 0) {
+      setFilteredPosts(myCollections);
+    } else {
+      setFilteredPosts(myCollections.filter(post => {
+        const content = post.content.toLowerCase();
+        return !blockedKeywords.some(keyword => content.includes(keyword.toLowerCase()));
+      }));
+    }
+  };
 
   const handleHug = (postId: string) => {
     const post = myCollections.find(p => p.id === postId);
@@ -37,8 +52,8 @@ const MyCollectionsPage: React.FC = () => {
   return (
     <View className={styles.container}>
       <ScrollView scrollY className={styles.list}>
-        {myCollections.length > 0 ? (
-          myCollections.map(post => (
+        {filteredPosts.length > 0 ? (
+          filteredPosts.map(post => (
             <PostCard
               key={post.id}
               post={post}
@@ -51,7 +66,9 @@ const MyCollectionsPage: React.FC = () => {
         ) : (
           <View className={styles.emptyState}>
             <Text className={styles.emptyIcon}>⭐</Text>
-            <Text className={styles.emptyText}>还没有收藏的内容</Text>
+            <Text className={styles.emptyText}>
+              {blockedKeywords.length > 0 ? '当前设置了屏蔽词，部分内容已被过滤' : '还没有收藏的内容'}
+            </Text>
           </View>
         )}
       </ScrollView>

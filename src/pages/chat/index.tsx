@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Input, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
+import { useApp } from '../../components/AppProvider';
 import styles from './index.module.scss';
 
 interface ChatMessage {
@@ -13,21 +14,22 @@ interface ChatMessage {
 }
 
 const ChatPage: React.FC = () => {
+  const { user, addPrivateMessage } = useApp();
+  const [otherId, setOtherId] = useState('');
   const [otherName, setOtherName] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
 
   useEffect(() => {
     const { fromId, fromName } = Taro.getCurrentInstance().router?.params || {};
-    if (fromName) {
-      setOtherName(decodeURIComponent(fromName));
-    }
+    if (fromId) setOtherId(fromId);
+    if (fromName) setOtherName(decodeURIComponent(fromName));
     
     setMessages([
       {
         id: '1',
         fromUserId: 'other',
-        fromName: '匿名用户',
+        fromName: otherName || '匿名用户',
         content: '你好呀，看到你的帖子，感觉我们境遇很像，有空聊聊吗？',
         createdAt: '2024-01-14 20:00'
       }
@@ -40,21 +42,33 @@ const ChatPage: React.FC = () => {
       return;
     }
 
+    const now = new Date();
+    const timeStr = now.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).replace(/\//g, '-');
+
     const newMessage: ChatMessage = {
       id: `msg_${Date.now()}`,
       fromUserId: 'me',
-      fromName: '我',
+      fromName: user.anonymousName,
       content: inputText.trim(),
-      createdAt: new Date().toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      }).replace(/\//g, '-')
+      createdAt: timeStr
     };
 
     setMessages([...messages, newMessage]);
+    addPrivateMessage({
+      id: `pm_${Date.now()}`,
+      type: 'private',
+      fromUserId: user.id,
+      fromAnonymousName: user.anonymousName,
+      content: inputText.trim(),
+      isRead: true,
+      createdAt: timeStr
+    });
     setInputText('');
   };
 

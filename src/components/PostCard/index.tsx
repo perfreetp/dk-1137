@@ -76,7 +76,7 @@ const PostCard: React.FC<PostCardProps> = ({
               {categoryLabels[post.category]}
             </Text>
             {post.visibility === 'department' && (
-              <Text className={styles.visibilityTag}>仅同部门可见</Text>
+              <Text className={styles.visibilityTag}>仅同部门外可见</Text>
             )}
           </View>
         </View>

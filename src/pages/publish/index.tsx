@@ -18,7 +18,7 @@ const categoryLabels: Record<CategoryType, string> = {
 };
 
 const visibilityLabels: Record<VisibilityType, string> = {
-  department: '仅同部门可见',
+  department: '仅同部门外可见',
   park: '全园区可见'
 };
 

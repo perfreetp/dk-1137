@@ -3,14 +3,28 @@ import { View, Text, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import { mockMessages } from '../../data/messages';
-import { Message } from '../../types';
+import { useApp } from '../../components/AppProvider';
 import styles from './index.module.scss';
 
 type MessageType = 'all' | 'comment' | 'hug' | 'private';
 
 const MessagesPage: React.FC = () => {
+  const { privateMessages } = useApp();
   const [activeTab, setActiveTab] = useState<MessageType>('all');
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
+  const [messages, setMessages] = useState<any[]>(mockMessages);
+
+  useEffect(() => {
+    const allMessages = [...privateMessages.map(pm => ({
+      id: pm.id,
+      type: 'private' as const,
+      fromUserId: pm.fromUserId,
+      fromAnonymousName: pm.fromAnonymousName,
+      content: pm.content,
+      isRead: pm.isRead,
+      createdAt: pm.createdAt
+    })), ...mockMessages];
+    setMessages(allMessages);
+  }, [privateMessages]);
 
   const unreadCount = messages.filter(m => !m.isRead).length;
 
@@ -19,7 +33,7 @@ const MessagesPage: React.FC = () => {
     return messages.filter(m => m.type === activeTab);
   };
 
-  const handleMessageClick = (message: Message) => {
+  const handleMessageClick = (message: any) => {
     if (!message.isRead) {
       setMessages(prev => prev.map(m => 
         m.id === message.id ? { ...m, isRead: true } : m
